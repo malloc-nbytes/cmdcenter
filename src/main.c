@@ -89,11 +89,12 @@ main(void)
 
         _Static_assert(sizeof(choices)/sizeof(*choices) == sizeof(funs)/sizeof(*funs));
 
-        int choice = forge_chooser("CMDCENTER", choices, sizeof(choices)/sizeof(*choices), 0);
-
-        if (choice == -1) return 0;
-
-        funs[choice]();
+        while (1) {
+                int choice = forge_chooser("CMDCENTER", choices, sizeof(choices)/sizeof(*choices), 0);
+                if (choice == -1) break;
+                funs[choice]();
+                if (choice == 1) break;
+        }
 
         return 0;
 }
