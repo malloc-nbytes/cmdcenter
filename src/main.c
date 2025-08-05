@@ -1,9 +1,24 @@
 #include <forge/chooser.h>
 #include <forge/cmd.h>
 #include <forge/err.h>
+#include <forge/arg.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
+#include <stdint.h>
+
+#define FLAG_2HY_KEYBOARD "keyboard"
+
+typedef enum {
+        FT_KEYBOARD = 1 << 0,
+} ft_type;
+
+static struct {
+        uint32_t flags;
+} g_config = {
+        .flags = 0x00000000,
+};
 
 void all(void);
 
@@ -20,14 +35,25 @@ fix_audio(void)
 void
 keyboard(void)
 {
-        int swap = forge_chooser_yesno("Would you like to swap CAPS with CTRL?", NULL, 1);
+        int swap;
+
+        if (g_config.flags & FT_KEYBOARD) {
+                swap = 1;
+        } else {
+                swap = forge_chooser_yesno("Would you like to swap CAPS with CTRL?", NULL, 1);
+        }
 
         if (swap) {
                 cmd("setxkbmap -option");
                 cmd("xmodmap -e \"clear Lock\"");
                 cmd("xmodmap -e \"keycode 66 = Control_L\"");
 
-                int enter = forge_chooser_yesno("Would you like to make LCTRL ENTER?", NULL, 1);
+                int enter;
+                if (g_config.flags & FT_KEYBOARD) {
+                        enter = 1;
+                } else {
+                        enter = forge_chooser_yesno("Would you like to make LCTRL ENTER?", NULL, 1);
+                }
 
                 if (enter) {
                         cmd("xmodmap -e \"keycode 37 = Return\"");
@@ -76,7 +102,7 @@ all(void)
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
         const char *choices[] = {
                 "PERFORM ALL (except fix audio [requires sudo])", // MUST BE HERE
@@ -88,6 +114,23 @@ main(void)
         };
 
         _Static_assert(sizeof(choices)/sizeof(*choices) == sizeof(funs)/sizeof(*funs));
+
+        forge_arg *arghd = forge_arg_alloc(argc, argv, 1);
+        forge_arg *arg = arghd;
+        while (arg) {
+                if (arg->h == 2 && !strcmp(arg->s, FLAG_2HY_KEYBOARD)) {
+                        g_config.flags |= FT_KEYBOARD;
+                } else {
+                        forge_err_wargs("unknown option `%s`", arg->s);
+                }
+                arg = arg->n;
+        }
+        forge_arg_free(arghd);
+
+        if (g_config.flags & FT_KEYBOARD) {
+                keyboard();
+                exit(0);
+        }
 
         while (1) {
                 int choice = forge_chooser("CMDCENTER", choices, sizeof(choices)/sizeof(*choices), 0);
