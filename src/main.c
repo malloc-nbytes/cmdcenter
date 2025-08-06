@@ -9,9 +9,11 @@
 #include <stdint.h>
 
 #define FLAG_2HY_KEYBOARD "keyboard"
+#define FLAG_2HY_XSET "xset"
 
 typedef enum {
         FT_KEYBOARD = 1 << 0,
+        FT_XSET = 1 << 1,
 } ft_type;
 
 static struct {
@@ -37,7 +39,9 @@ keyboard(void)
 {
         int swap;
 
-        if (g_config.flags & FT_KEYBOARD) {
+        if (g_config.flags & FT_XSET) {
+                swap = 0;
+        } else if (g_config.flags & FT_KEYBOARD) {
                 swap = 1;
         } else {
                 swap = forge_chooser_yesno("Would you like to swap CAPS with CTRL?", NULL, 1);
@@ -62,7 +66,7 @@ keyboard(void)
                 cmd("xmodmap -e \"add Control = Control_L Control_R\"");
         }
 
-        cmd("xset r rate 210 50");
+        cmd("xset r rate 150 50");
 }
 
 void
@@ -120,6 +124,8 @@ main(int argc, char **argv)
         while (arg) {
                 if (arg->h == 2 && !strcmp(arg->s, FLAG_2HY_KEYBOARD)) {
                         g_config.flags |= FT_KEYBOARD;
+                } else if (arg->h == 2 && !strcmp(arg->s, FLAG_2HY_XSET)) {
+                        g_config.flags |= FT_XSET;
                 } else {
                         forge_err_wargs("unknown option `%s`", arg->s);
                 }
@@ -127,7 +133,7 @@ main(int argc, char **argv)
         }
         forge_arg_free(arghd);
 
-        if (g_config.flags & FT_KEYBOARD) {
+        if ((g_config.flags & FT_KEYBOARD) || (g_config.flags & FT_XSET)) {
                 keyboard();
                 exit(0);
         }
