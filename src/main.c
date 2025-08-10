@@ -50,7 +50,7 @@ keyboard(void)
         if (swap) {
                 cmd("setxkbmap -option");
                 cmd("xmodmap -e \"clear Lock\"");
-                cmd("xmodmap -e \"keycode 66 = Control_L\"");
+                cmd("xmodmap -e \"keysym 0xffe5 = Control_L\"");
 
                 int enter;
                 if (g_config.flags & FT_KEYBOARD) {
