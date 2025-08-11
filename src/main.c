@@ -66,7 +66,8 @@ keyboard(void)
                 cmd("xmodmap -e \"add Control = Control_L Control_R\"");
         }
 
-        cmd("xset r rate 150 50");
+        //cmd("xset r rate 150 50");
+        cmd("xset r rate 200 50");
 }
 
 void
