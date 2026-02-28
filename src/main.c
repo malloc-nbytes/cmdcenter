@@ -89,6 +89,22 @@ animx(void)
         cmd("AnimX --restore");
 }
 
+void
+disable_scrn_sleep(void)
+{
+        cmd("xset s off");
+        cmd("xset -dpms");
+        cmd("xset s noblank");
+}
+
+void
+enable_scrn_sleep(void)
+{
+        cmd("xset s on");
+        cmd("xset +dpms");
+        cmd("xset s default");
+}
+
 void (*funs[])(void) = {
         all,
         fix_audio,
@@ -96,6 +112,8 @@ void (*funs[])(void) = {
         arandr,
         picom,
         animx,
+        disable_scrn_sleep,
+        enable_scrn_sleep,
 };
 
 void
@@ -116,6 +134,8 @@ main(int argc, char **argv)
                 "ADJUST MONITOR LOCATIONS",
                 "ENABLE COMPOSITOR",
                 "LAUNCH BACKGROUND",
+                "DISABLE SCREEN SLEEP",
+                "ENABLE SCREEN SLEEP",
         };
 
         _Static_assert(sizeof(choices)/sizeof(*choices) == sizeof(funs)/sizeof(*funs));
